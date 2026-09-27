@@ -1,0 +1,547 @@
+<!doctype html><html lang=en dir=auto data-theme=auto><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1,shrink-to-fit=no"><meta name=robots content="index, follow"><title>Notes on Quantum Computing | dhmb</title><meta name=keywords content><meta name=description content="This post contains some notes on quantum computing and how to simulate circuits in Python using IBM Qiskit. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.
+This post will only focus on the computational aspect, the physical implementation of qubits and quantum error correction will be ignored.
+Quantum Mechanics and Measurement
+In the Schrödinger picture of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the Schrödinger equation. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here."><meta name=author content="dhmb"><link rel=canonical href=https://dhmb.github.io/posts/notes-on-quantum-computing/><meta name=google-site-verification content="XYZabc"><meta name=yandex-verification content="XYZabc"><meta name=msvalidate.01 content="XYZabc"><link crossorigin=anonymous href=/assets/css/stylesheet.09892119baf1f9d5f738f6370f25ae322efdbb404a92e37935a2ff78503d3318.css integrity="sha256-CYkhGbrx+dX3OPY3DyWuMi79u0BKkuN5NaL/eFA9Mxg=" rel="preload stylesheet" as=style><link rel=icon href=https://dhmb.github.io/favicon.ico><link rel=icon type=image/png sizes=16x16 href=https://dhmb.github.io/favicon-16x16.png><link rel=icon type=image/png sizes=32x32 href=https://dhmb.github.io/favicon-32x32.png><link rel=apple-touch-icon href=https://dhmb.github.io/apple-touch-icon.png><link rel=mask-icon href=https://dhmb.github.io/safari-pinned-tab.svg><meta name=theme-color content="#2e2e33"><meta name=msapplication-TileColor content="#2e2e33"><link rel=alternate hreflang=en href=https://dhmb.github.io/posts/notes-on-quantum-computing/><noscript><style>#theme-toggle,.top-link{display:none}</style><style>@media(prefers-color-scheme:dark){:root{--theme:rgb(29, 30, 32);--entry:rgb(46, 46, 51);--primary:rgb(218, 218, 219);--secondary:rgb(155, 156, 157);--tertiary:rgb(65, 66, 68);--content:rgb(196, 196, 197);--code-block-bg:rgb(46, 46, 51);--code-bg:rgb(55, 56, 62);--border:rgb(51, 51, 51);color-scheme:dark}.list{background:var(--theme)}.toc{background:var(--entry)}}</style></noscript><script>localStorage.getItem("pref-theme")==="dark"?document.querySelector("html").dataset.theme="dark":localStorage.getItem("pref-theme")==="light"?document.querySelector("html").dataset.theme="light":window.matchMedia("(prefers-color-scheme: dark)").matches?document.querySelector("html").dataset.theme="dark":document.querySelector("html").dataset.theme="light"</script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css integrity=sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X crossorigin=anonymous><script defer src=https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js integrity=sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4 crossorigin=anonymous></script><script defer src=https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js integrity=sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa crossorigin=anonymous onload=renderMathInElement(document.body)></script><script>document.addEventListener("DOMContentLoaded",function(){renderMathInElement(document.body,{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1}]})})</script><meta property="og:url" content="https://dhmb.github.io/posts/notes-on-quantum-computing/"><meta property="og:site_name" content="dhmb"><meta property="og:title" content="Notes on Quantum Computing"><meta property="og:description" content="This post contains some notes on quantum computing and how to simulate circuits in Python using IBM Qiskit. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.
+This post will only focus on the computational aspect, the physical implementation of qubits and quantum error correction will be ignored.
+Quantum Mechanics and Measurement In the Schrödinger picture of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the Schrödinger equation. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here."><meta property="og:locale" content="en"><meta property="og:type" content="article"><meta property="article:section" content="posts"><meta property="article:published_time" content="2026-09-19T00:00:00+00:00"><meta property="article:modified_time" content="2026-09-19T00:00:00+00:00"><meta property="og:image" content="https://dhmb.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:card content="summary_large_image"><meta name=twitter:image content="https://dhmb.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E"><meta name=twitter:title content="Notes on Quantum Computing"><meta name=twitter:description content="This post contains some notes on quantum computing and how to simulate circuits in Python using IBM Qiskit. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.
+This post will only focus on the computational aspect, the physical implementation of qubits and quantum error correction will be ignored.
+Quantum Mechanics and Measurement In the Schrödinger picture of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the Schrödinger equation. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here."><script type=application/ld+json>{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Posts","item":"https://dhmb.github.io/posts/"},{"@type":"ListItem","position":2,"name":"Notes on Quantum Computing","item":"https://dhmb.github.io/posts/notes-on-quantum-computing/"}]}</script><script type=application/ld+json>{"@context":"https://schema.org","@type":"BlogPosting","headline":"Notes on Quantum Computing","name":"Notes on Quantum Computing","description":"This post contains some notes on quantum computing and how to simulate circuits in Python using IBM Qiskit. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.\nThis post will only focus on the computational aspect, the physical implementation of qubits and quantum error correction will be ignored.\nQuantum Mechanics and Measurement In the Schrödinger picture of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the Schrödinger equation. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here.\n","keywords":[],"articleBody":"This post contains some notes on quantum computing and how to simulate circuits in Python using IBM Qiskit. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.\nThis post will only focus on the computational aspect, the physical implementation of qubits and quantum error correction will be ignored.\nQuantum Mechanics and Measurement In the Schrödinger picture of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the Schrödinger equation. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here.\nFor the purpose of quantum computing we simplify this model and assume the evolution happens in discrete steps, the quantum logic gates. The combination of all the quantum logic gates form the quantum circuit. This is similar to the classical case, where classic logic gates provide a simplified model hiding the underlying physics.\nThe quantum state can be represented as $\\ket{\\psi}$. This notation is the bra-ket notation, the state vectors in particular are called kets. Each quantum gate is implemented as a unitary operator $U$ that acts on the state $\\ket{\\psi}$:\n$$ \\tilde{\\ket{\\psi}} = U \\ket{\\psi}. $$Note that for unitary operators we have $U^{\\dagger} U = I$, so the inverse transformation is given by\n$$ \\ket{\\psi} = U^{-1} \\tilde{\\ket{\\psi}} = U^{\\dagger} \\tilde{\\ket{\\psi}}. $$A quantum state can be measured using an observable, which in general can be any self-adjoint operator $A$ on the Hilbert space. In our finite-dimensional case we can represent the operator as a Hermitian matrix, this is a matrix that is equal to its own conjugate transpose:\n$$ A = A^{\\dagger}. $$An important property of a Hermitian matrix is that it has real eigenvalues and the corresponding eigenvectors form an orthonormal basis for the Hilbert space. This means we can decompose the operator in terms of its eigenvectors:\n$$ A = \\sum_i a_i \\ket{a_i} \\bra{a_i}, $$where the coefficient $a_i$ is the eigenvalue corresponding to the normalized eigenvector $\\ket{a_i}$. This is the spectral decomposition (the spectrum being the set of eigenvalues). The new symbol $\\bra{a_i}$ is called a bra. Technically this is a dual vector, a linear functional from the vector space to the corresponding field $\\mathbb{C}$. It has the property that if we multiply it by a regular vector, so a ket, from the right side it returns the inner product. Since the eigenvectors form an orthonormal basis we have:\n$$ \\braket{a_i|a_j} = \\delta_{ij}. $$Now we can define quantum measurement, which is a probabilistic process. If we have state $\\ket{\\psi}$ and we measure it using observable $A$ we will get as measurement value one of the eigenvalues $a_i$ of that observable. The corresponding probability is given by:\n$$ P(a_i) = \\left|\\braket{a_i|\\psi}\\right|^2. $$Of course the total probability over all possible outcomes should add up to 1, and this is guaranteed because $\\ket{\\psi}$ is a normalized vector. We can see this by writing $\\ket{\\psi}$ as a linear combination of the eigenvectors of the observable:\n$$ \\ket{\\psi} = \\sum_i \\alpha_i \\ket{a_i}, $$and because $\\ket{\\psi}$ is normalized we have\n$$ \\begin{aligned} 1 = \\braket{\\psi|\\psi} \u0026= \\sum_i \\sum_j \\bar{\\alpha_i} \\alpha_j \\braket{a_i|a_j} \\\\ \u0026= \\sum_i \\sum_j \\bar{\\alpha_i} \\alpha_j \\delta_{ij} \\\\ \u0026= \\sum_i |\\alpha_i|^2. \\end{aligned} $$Using the same decomposition of $\\ket{\\psi}$ we can rewrite the probability as:\n$$ P(a_i) = \\left|\\braket{a_i|\\psi}\\right|^2 = \\left|\\sum_j \\alpha_j \\braket{a_i|a_j}\\right|^2 = |\\alpha_i|^2, $$so indeed we have\n$$ \\sum_i P(a_i) = 1. $$In the process of measurement the state collapses to the eigenvector corresponding to the measured value, so if we measure value $a_i$, then $\\ket{\\psi} \\rightarrow \\ket{a_i}$.\nSingle qubit systems As we saw, states in quantum mechanics can be represented as normalized vectors in some complex Hilbert space. For a single qubit system this is the 2-dimensional Hilbert space $\\mathbb{C}^2$. Any (pure) qubit state can be written as:\n$$ \\ket{\\psi} = \\alpha \\ket{0} + \\beta \\ket{1}, \\, \\text{with} \\, |\\alpha|^2+|\\beta|^2 = 1, $$with $\\ket{0}$ and $\\ket{1}$ the standard orthonormal basis vectors in the computational basis and $\\alpha$ and $\\beta$ complex coefficients. In standard vector notation we can write:\n$$ \\ket{\\psi} = \\alpha \\begin{bmatrix} 1 \\\\ 0 \\end{bmatrix} + \\beta \\begin{bmatrix} 0 \\\\ 1 \\end{bmatrix} = \\begin{bmatrix} \\alpha \\\\ \\beta \\end{bmatrix}. $$As discussed earlier measurement is implemented using a Hermitian operator. In $\\mathbb{C}^2$ Hermitian operators can be written as Hermitian matrices, a square matrix that equals its own conjugate transpose, so $a_{ij} = \\overline{a_{ji}}$. This is typically written as:\n$$ A = A^{\\dagger}. $$The standard measurement in the computational basis is using the Pauli-Z operator, which is Hermitian:\n$$ Z = \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 -1 \\end{bmatrix} $$The eigenvectors of this operator are exactly the standard basis vectors of the computational basis with corresponding eigenvalues -1 and +1:\n$$ \\begin{aligned} Z \\ket{0} \u0026= \\ket{0} \\\\ Z \\ket{1} \u0026= -\\ket{1} \\\\ \\end{aligned} $$when applied to an arbitrary qubit we get:\n$$ Z \\left[\\alpha \\ket{0} + \\beta \\ket{1} \\right] = \\alpha \\ket{0} - \\beta \\ket{1}, $$so the measurement will return eigenvalue +1 with probability $|\\alpha|^2$ and -1 with probability $|\\beta|^2$. Due to the normalization this adds up to total probability 1, as expected. The outcome with eigenvalue +1 is identified with bit value 0 and the outcome with eigenvalue -1 with bit value 1.\nBloch sphere A single qubit state is normalized, and the global phase does not have any physical significance. This implies we can identify any state, up to the phase, with a point on the two-dimensional sphere, the so-called Bloch sphere representation. The basis vectors $\\ket{0}$ and $\\ket{1}$ are mapped to the north pole and south pole respectively:\nBloch sphere\nThe state is parametrized with the angles $\\theta$ and $\\varphi$.\nSingle qubit quantum logic gates The simplest quantum logic gates operate on a single qubit. As mentioned before each quantum gate is represented using a unitary operator.\nIdentity gate A special case is the identity operator, which is not changing the state at all, but can be handy in terms of notation. It is represented by the identity matrix:\n$$ I = \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 1 \\end{bmatrix}. $$Pauli gates The most common non-trivial gates are the 3 Pauli gates:\n$$ \\begin{aligned} X = \\operatorname{NOT} \u0026 = \\sigma_x = \\begin{bmatrix} 0 \u0026 1 \\\\ 1 \u0026 0 \\end{bmatrix} \\\\ Y \u0026 = \\sigma_y = \\begin{bmatrix} 0 \u0026 -i \\\\ i \u0026 0 \\end{bmatrix} \\\\ Z \u0026 = \\sigma_z = \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 -1 \\end{bmatrix} \\end{aligned} $$The $X$ gate is also called the $\\operatorname{NOT}$ gate since it flips $\\ket{0}$ and $\\ket{1}$:\n$$ X \\ket{0} = \\ket{1}, \\quad X \\ket{1} = \\ket{0}. $$The $Y$ gate also flips $\\ket{0}$ and $\\ket{1}$, but additionally introduces a phase flip:\n$$ Y \\ket{0} = i \\ket{1}, \\quad Y \\ket{1} = -i \\ket{0}. $$The $Z$ gate leaves $\\ket{0}$ unchanged and flips $\\ket{1}$:\n$$ Z \\ket{0} = \\ket{0}, \\quad Z \\ket{1} = - \\ket{1}. $$Note that the $Z$ gate is the same operator as the observable used for measurement. This can happen because the operator is both unitary and Hermitian. This is not generally true, but for the Pauli operators it is.\nHadamard gate Another common gate is the Hadamard gate. This operator acts on the standard basis by creating a superposition:\n$$ \\begin{aligned} H \\ket{0} \u0026= \\ket{+} = \\frac{1}{\\sqrt{2}} \\left(\\ket{0} + \\ket{1}\\right) \\\\ H \\ket{1} \u0026= \\ket{-} = \\frac{1}{\\sqrt{2}} \\left(\\ket{0} - \\ket{1}\\right) \\end{aligned} $$Its matrix representation is given by\n$$ H = \\frac{1}{\\sqrt{2}} \\begin{bmatrix} 1 \u0026 1 \\\\ 1 \u0026 -1 \\end{bmatrix}. $$As we will see this gate is used for creating (maximally) entangled qubits.\nPhase shift gates The general phase shift gate is given by\n$$ P(\\varphi) = \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 e^{i\\varphi} \\end{bmatrix}, $$so rather than a specific gate this is a parametrized family of gates. It shifts the phase between the qubits, by leaving $\\ket{0}$ untouched and phase shifting $\\ket{1}$ by $\\varphi$. Some special cases of $\\varphi$ are given by:\n$$ \\begin{aligned} Z \u0026= P\\left(\\pi \\right) \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 e^{i\\pi} \\end{bmatrix} \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 -1 \\end{bmatrix} \\\\ S \u0026= P\\left(\\frac{\\pi}{2}\\right) \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 e^{i \\frac{\\pi}{2}} \\end{bmatrix} \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 i \\end{bmatrix} \\\\ T \u0026= P\\left(\\frac{\\pi}{4}\\right) \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 e^{i \\frac{\\pi}{4}} \\end{bmatrix} \u0026= \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 e^{i \\frac{\\pi}{4}} \\end{bmatrix} \\\\ \\end{aligned} $$so the $Z$ gate can be seen as a special case of the phase shift gates. Also notice that $S$ and $T$ are unitary, but they are not Hermitian, which is directly clear from the complex values on the diagonal.\nRotation gates The rotation gates are defined as rotations of a specified angle around one of axis of the Bloch sphere. They are parametrized by an angle. The actions on the basis vector are given by:\n$$ \\begin{aligned} R_x(\\theta) \\ket{0} \u0026= \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{0} - i \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{1} \\\\ R_x(\\theta) \\ket{1} \u0026= - i \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{0} + \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{1} \\\\ R_y(\\theta) \\ket{0} \u0026= \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{0} + \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{1} \\\\ R_y(\\theta) \\ket{1} \u0026= - \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{0} + \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{1} \\\\ R_z(\\varphi) \\ket{0} \u0026= \\exp \\left(- \\frac{i \\varphi}{2} \\right) \\ket{0} \\\\ R_z(\\varphi) \\ket{1} \u0026= \\exp \\left(\\frac{i \\varphi}{2} \\right) \\ket{1} \\\\ \\end{aligned} $$If we ignore the global phase we can create any arbitrary single qubit state with just a single $R_y$ and $R_z$ transformation. Assume we have state\n$$ \\psi = \\alpha \\ket{0} + \\beta \\ket{1}, $$since we ignore the global phase we can write $\\alpha = \\cos \\theta$ and $\\beta = e^{i \\varphi} \\sin \\theta$ (note that $|\\alpha|^2+|\\beta|^2 = 1$ as expected). If we start out with $\\ket{0}$ we can now write:\n$$ \\begin{aligned} \\tilde{\\psi} \u0026= R_z(\\varphi) R_y(\\theta) \\ket{0} \\\\ \u0026= R_z(\\varphi) \\left( \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{0} + \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{1} \\right) \\\\ \u0026= \\exp \\left(- \\frac{i \\varphi}{2} \\right) \\cos \\left( \\frac{\\theta}{2} \\right) \\ket{0} + \\exp \\left(\\frac{i \\varphi}{2} \\right) \\sin \\left( \\frac{\\theta}{2} \\right) \\ket{1}, \\end{aligned} $$so we have $\\psi = \\exp \\left(\\frac{i \\varphi}{2} \\right) \\tilde{\\psi}$.\nVisualization and simulation One way to visualize and simulate quantum circuits is IBM Quantum Composer. You can draw the circuits by drag-and-dropping the gates.\nAn example circuit is given by:\nSimple quantum circuit\nIn this example we chose $\\theta = 2 \\arccos 0.6 \\approx 1.854590436$, then $\\cos \\theta = 0.6$ and $\\sin \\theta = 0.8$. The phase disk show the probability of getting $\\ket{1}$ at the given point in the circuit. The circuit can be described as:\n$$ \\begin{aligned} \\ket{\\psi} \u0026= H X R_y (\\theta) \\ket{0} \\\\ \u0026= H X \\left(0.6 \\ket{0} + 0.8 \\ket{1} \\right) \\\\ \u0026= H \\left ( 0.8 \\ket{0} + 0.6 \\ket{1} \\right) \\\\ \u0026= \\frac{0.8}{\\sqrt{2}} (\\ket{0} + \\ket{1}) + \\frac{0.6}{\\sqrt{2}} (\\ket{0} - \\ket{1}) \\\\ \u0026= \\frac{1.4}{\\sqrt{2}} \\ket{0} + \\frac{0.2}{\\sqrt{2}} \\ket{1} \\end{aligned} $$The final probability for $\\ket{0}$ is $\\left(\\frac{0.2}{\\sqrt{2}}\\right)^2 = 0.02$.\nThe circuit can be generated using the script:\nOPENQASM 2.0; include \"qelib1.inc\"; qreg q[1]; barrier q; // @phaseDisk ry(1.854590436) q[0]; barrier q; // @phaseDisk x q[0]; barrier q; // @phaseDisk h q[0]; barrier q; // @phaseDisk In this case we only have qubits in the simulation. Later on we also add classical bits, when we create a circuit to simulate quantum teleportation.\nMulti-qubit systems In order to create more interesting, entangled, states we need two-qubit quantum logic gates. This means we need to enlarge the Hilbert space from two-dimensional to a 4-dimensional system. This can be achieved by taking the tensor product of the two small systems. Different notations can be used. We now have four canonical basis vectors, for example:\n$$ \\ket{0} \\otimes \\ket{1} = \\ket{0}\\ket{1} = \\ket{0,1} = \\ket{01}, $$The first form shows explicitly the tensor product and is most precise, but this becomes tedious especially when even more qubits are involved. We will stick with the most compact form $\\ket{01}$, which works as long as the labels are not ambiguous.\nSometimes subscript labels are used to explicitly show which qubit is acted on, for example\n$$ \\ket{\\psi}_{AB} = \\ket{0}_A \\ket{1}_B. $$A general two-qubit state can be written as\n$$ \\ket{\\psi} = \\alpha \\ket{00} + \\beta \\ket{01} + \\gamma \\ket{10} + \\delta \\ket{11}, $$where the four coefficients are complex numbers. Again the state needs to be normalized, so\n$$ |\\alpha|^2+|\\beta|^2+|\\gamma|^2+|\\delta|^2 = 1. $$This directly generalizes to a larger number of qubits, with the number of dimensions growing like $2^n$ where $n$ is the number of qubits.\nTwo-qubit quantum logic gates A trivial example of a two-qubit quantum logic gate leaves one of the qubits untouched. If we label the qubits $A$ and $B$ and apply the $Z$ operator to the first qubit. This can be written as:\n$$ \\begin{aligned} (Z_A \\otimes I_B) \\ket{\\psi} \u0026= (Z_A \\otimes I_B) \\left[ \\alpha \\ket{0}_A \\ket{0}_B + \\beta \\ket{0}_A \\ket{1}_B + \\gamma \\ket{1}_A \\ket{0}_B + \\delta \\ket{1}_A \\ket{1}_B \\right] \\\\ \u0026= \\alpha Z_A \\ket{0}_A I_B \\ket{0}_B + \\beta Z_A \\ket{0}_A I_B \\ket{1}_B + \\gamma Z_A \\ket{1}_A I_B \\ket{0}_B + \\delta Z_A \\ket{1}_A I_B \\ket{1}_B \\\\ \u0026= \\alpha \\ket{0}_A \\ket{0}_B + \\beta \\ket{0}_A \\ket{1}_B - \\gamma \\ket{1}_A \\ket{0}_B - \\delta \\ket{1}_A \\ket{1}_B \\end{aligned} $$This looks quite messy, but all it does is flipping the sign for terms containing $\\ket{1}_A$ and leaving the second qubit untouched.\nWe can write this in standard matrix notation as well, first we write the orthonormal basis vectors in the standard computational bases as:\n$$ \\ket{00} = \\begin{bmatrix} 1 \\\\ 0 \\\\ 0 \\\\ 0 \\\\ \\end{bmatrix}, \\ket{01} = \\begin{bmatrix} 0 \\\\ 1 \\\\ 0 \\\\ 0 \\\\ \\end{bmatrix}, \\ket{10} = \\begin{bmatrix} 0 \\\\ 0 \\\\ 1 \\\\ 0 \\\\ \\end{bmatrix}, \\ket{11} = \\begin{bmatrix} 0 \\\\ 0 \\\\ 0 \\\\ 1 \\\\ \\end{bmatrix}. $$Looking at how $Z_A \\otimes I_B$ acts on those basis vectors, we can write\n$$ Z_A \\otimes I_B = \\begin{bmatrix} 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 1 \u0026 0 \u0026 0 \\\\ 0 \u0026 0 \u0026 -1 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 -1 \\\\ \\end{bmatrix}. $$If we would transform the second qubit instead we get\n$$ I_A \\otimes Z_B = \\begin{bmatrix} 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 -1 \u0026 0 \u0026 0 \\\\ 0 \u0026 0 \u0026 1 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 -1 \\\\ \\end{bmatrix}. $$Similarly we can write out the transformations for the $X$ operator:\n$$ X_A \\otimes I_B = \\begin{bmatrix} 0 \u0026 0 \u0026 1 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 1 \\\\ 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 1 \u0026 0 \u0026 0 \\\\ \\end{bmatrix}, $$and\n$$ I_A \\otimes X_B = \\begin{bmatrix} 0 \u0026 1 \u0026 0 \u0026 0 \\\\ 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 1 \\\\ 0 \u0026 0 \u0026 1 \u0026 0 \\\\ \\end{bmatrix}. $$Note that some of these transformations have a block-diagonal representation and others do not, but none of them are entangling the qubits.\nControlled gates Things get more interesting if we introduce entanglement between the qubits. A common gate is the $\\operatorname{CNOT}$ gate, or controlled-$\\operatorname{NOT}$ gate. It has two input qubits, the control qubit and the target qubit. Depending on the state of the control qubit it applies the $\\operatorname{NOT}$ gate from before to the target qubit, or leave it untouched.\nThis operator acts on the standard basis vectors as:\n$$ \\operatorname{CNOT} \\ket{00} = \\ket{00}, \\\\ \\operatorname{CNOT} \\ket{01} = \\ket{01}, \\\\ \\operatorname{CNOT} \\ket{10} = \\ket{11}, \\\\ \\operatorname{CNOT} \\ket{11} = \\ket{10}. $$The corresponding matrix in the standard basis is given by\n$$ \\operatorname{CNOT} = \\begin{bmatrix} 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 1 \u0026 0 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 1 \\\\ 0 \u0026 0 \u0026 1 \u0026 0 \\\\ \\end{bmatrix}. $$This can also be written as the block matrix system\n$$ \\operatorname{CNOT} = \\begin{bmatrix} I \u0026 0 \\\\ 0 \u0026 X \\\\ \\end{bmatrix}. $$Again this is a block diagonal matrix, but this operator does introduce entanglement between the two qubits. In the next section a measure for the entanglement will be introduced. Sometimes the operator will be written as $\\operatorname{CX}$.\nThe concept of controlled gates can be applied to other single qubit gates as well, for example the controlled $Z$ gate, $\\operatorname{CZ}$, which can be represented as:\n$$ \\operatorname{CZ} = \\begin{bmatrix} I \u0026 0 \\\\ 0 \u0026 Z \\\\ \\end{bmatrix}, $$conditionally applying the $Z$ operator to the target qubit depending on the value of the control qubit:\n$$ \\begin{aligned} \\operatorname{CZ} \\ket{00} \u0026= \\ket{00}, \\\\ \\operatorname{CZ} \\ket{01} \u0026= \\ket{01}, \\\\ \\operatorname{CZ} \\ket{10} \u0026= \\ket{10}, \\\\ \\operatorname{CZ} \\ket{11} \u0026= -\\ket{11}. \\end{aligned} $$The matrix notation becomes:\n$$ \\operatorname{CZ} = \\begin{bmatrix} 1 \u0026 0 \u0026 0 \u0026 0 \\\\ 0 \u0026 1 \u0026 0 \u0026 0 \\\\ 0 \u0026 0 \u0026 1 \u0026 0 \\\\ 0 \u0026 0 \u0026 0 \u0026 -1 \\\\ \\end{bmatrix}. $$So each single qubit gate induces a two-qubit gate by using the induced controlled gate.\nEntanglement between qubits Multi-qubit operators can introduce entanglement, but it is more clear to think about entanglement in terms of the state itself. Entanglement is defined in terms of a tensor-product decomposition of the Hilbert space the state lives in.\nAs mentioned before when looking at a two-qubit system we take the tensor product of the original complex Hilbert spaces, resulting in a 4-dimensional complex Hilbert space. The space is equal to the span of the standard basis vectors. This can be written explicitly as:\n$$ \\mathbb{C}^4 \\cong \\mathbb{C}^2 \\otimes \\mathbb{C}^2 = \\text{span} \\left\\{ \\ket{0} \\otimes \\ket{0}, \\ket{1} \\otimes \\ket{0}, \\ket{0} \\otimes \\ket{1}, \\ket{1} \\otimes \\ket{1} \\right\\}. $$A state is called entangled if it cannot be written as the tensor product of two single-qubit states. Another way of saying it is that the state must be decomposable as a tensor product of states in the two subsystems, so:\n$$ \\ket{\\psi} = \\ket{\\psi}_A \\otimes \\ket{\\psi}_B $$for some $\\ket{\\psi}_A$ and $\\ket{\\psi}_B$.\nClearly the basis vectors or any multiple of them are not entangled. Another example of a non-entangled state is:\n$$ \\ket{\\psi} = \\ket{+}_A \\otimes \\ket{0}_B = \\frac{1}{\\sqrt{2}}\\left( \\ket{0}_A + \\ket{1}_A \\right) \\otimes \\ket{0}_B = \\frac{1}{\\sqrt{2}} \\left( \\ket{00} + \\ket{10} \\right). $$This can intuitively be understood by factoring out $\\ket{0}$ on the right (remember tensor products are generally not commutative).\nTo see what an entangled state looks like we can operate on the previous non-entangled example with the $\\operatorname{CNOT}$ gate. The control qubit $\\ket{+}$ is in a super position, resulting in a new state:\n$$ \\ket{\\Phi^+} = \\operatorname{CNOT} \\ket{\\psi} = \\frac{1}{\\sqrt{2}} \\left( \\operatorname{CNOT} \\ket{00} + \\operatorname{CNOT} \\ket{10} \\right) = \\frac{1}{\\sqrt{2}} \\left( \\ket{00} + \\ket{11} \\right). $$This is a Bell state. To see that $\\ket{\\Phi^+}$ is entangled, assume it is not entangled but separable and we can write it as:\n$$ \\ket{\\Phi^+} = \\left(\\alpha \\ket{0} + \\beta \\ket{1} \\right) \\left(\\gamma \\ket{0} + \\delta \\ket{1} \\right), $$this is the most general separable state. Now equating like terms we need to have\n$$ \\begin{aligned} \\alpha \\gamma = \\frac{1}{\\sqrt{2}}, \\, \\, \\alpha \\delta = 0, \\, \\,\\beta \\gamma = 0, \\, \\, \\beta \\delta = \\frac{1}{\\sqrt{2}}, \\end{aligned} $$which is clearly impossible since either $\\alpha=0$ or $\\delta=0$, so we can never have $\\alpha \\gamma = \\beta \\delta = \\frac{1}{\\sqrt{2}}$, hence $\\ket{\\Phi^+}$ is inseparable and thus an entangled state (as we will see it is actually maximally entangled).\nThere are different measures of quantifying the degree of entanglement, so-called entanglement monotones. When having a system of two qubits a common way is the concurrence. Another common measure is the von Neumann entropy, which is more general and can be used as a measure of statistical uncertainty for mixed states and larger systems as well.\nThe concurrence can be used for pure and mixed states. When looking at the general pure state\n$$ \\ket{\\psi} = \\alpha \\ket{00} + \\beta \\ket{01} + \\gamma \\ket{10} + \\delta \\ket{11}, $$the concurrence is given by:\n$$ C(\\ket{\\psi}) = 2 |\\alpha \\delta - \\beta \\gamma|. $$When $C=0$ the state is separable and thus non-entangled. For $C=1$ the state is maximally entangled, and for $0","wordCount":"4999","inLanguage":"en","image":"https://dhmb.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished":"2026-09-19T00:00:00Z","dateModified":"2026-09-19T00:00:00Z","author":{"@type":"Person","name":"dhmb"},"mainEntityOfPage":{"@type":"WebPage","@id":"https://dhmb.github.io/posts/notes-on-quantum-computing/"},"publisher":{"@type":"Organization","name":"dhmb","logo":{"@type":"ImageObject","url":"https://dhmb.github.io/favicon.ico"}}}</script></head><body id=top><header class=header><nav class=header-nav><div class=logo><a href=https://dhmb.github.io/ accesskey=h title="Home (Alt + H)"><img src=https://dhmb.github.io/apple-touch-icon.png alt aria-label=logo height=35>Home</a><div class=logo-switches><button id=theme-toggle class=theme-toggle accesskey=t title="(Alt + T)" aria-label="Toggle theme">
+<svg class="moon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+<svg class="sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button></div></div><ul id=menu class=menu></ul></nav></header><main class=main><article class=post-single><header class=post-header><nav class=breadcrumbs role=navigation aria-label=Breadcrumb><a href=/>Home</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg>
+<a href=/posts/>Posts</a>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"/></svg></nav><h1 class="post-title entry-hint-parent">Notes on Quantum Computing</h1><div class=post-meta><span title='2026-09-19 00:00:00 +0000 UTC'>September 19, 2026</span>&nbsp;·&nbsp;<span>dhmb</span></div></header><div class="post-content md-content"><p>This post contains some notes on quantum computing and how to simulate circuits in Python using <a href=https://www.ibm.com/quantum/qiskit>IBM Qiskit</a>. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.</p><p>This post will only focus on the computational aspect, the <a href=https://en.wikipedia.org/wiki/Qubit#Physical_implementation>physical implementation of qubits</a> and <a href=https://en.wikipedia.org/wiki/Quantum_error_correction>quantum error correction</a> will be ignored.</p><h2 id=quantum-mechanics-and-measurement>Quantum Mechanics and Measurement<a hidden class=anchor aria-hidden=true href=#quantum-mechanics-and-measurement>#</a></h2><p>In the <a href=https://en.wikipedia.org/wiki/Schr%C3%B6dinger_picture>Schrödinger picture</a> of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the <a href=https://en.wikipedia.org/wiki/Schr%C3%B6dinger_equation>Schrödinger equation</a>. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here.</p><p>For the purpose of quantum computing we simplify this model and assume the evolution happens in discrete steps, the quantum logic gates. The combination of all the quantum logic gates form the quantum circuit. This is similar to the classical case, where classic logic gates provide a simplified model hiding the underlying physics.</p><p>The quantum state can be represented as $\ket{\psi}$. This notation is the <a href=https://en.wikipedia.org/wiki/Bra%E2%80%93ket_notation>bra-ket</a> notation, the state vectors in particular are called kets. Each quantum gate is implemented as a unitary operator $U$ that acts on the state $\ket{\psi}$:</p>$$
+\tilde{\ket{\psi}} = U \ket{\psi}.
+$$<p>Note that for unitary operators we have $U^{\dagger} U = I$, so the inverse transformation is given by</p>$$
+\ket{\psi} = U^{-1} \tilde{\ket{\psi}} = U^{\dagger} \tilde{\ket{\psi}}.
+$$<p>A quantum state can be measured using an observable, which in general can be any self-adjoint operator $A$ on the Hilbert space. In our finite-dimensional case we can represent the operator as a <a href=https://en.wikipedia.org/wiki/Hermitian_matrix>Hermitian matrix</a>, this is a matrix that is equal to its own conjugate transpose:</p>$$
+A = A^{\dagger}.
+$$<p>An important property of a Hermitian matrix is that it has real eigenvalues and the corresponding eigenvectors form an orthonormal basis for the Hilbert space. This means we can decompose the operator in terms of its eigenvectors:</p>$$
+A = \sum_i a_i \ket{a_i} \bra{a_i},
+$$<p>where the coefficient $a_i$ is the eigenvalue corresponding to the normalized eigenvector $\ket{a_i}$. This is the spectral decomposition (the spectrum being the set of eigenvalues). The new symbol $\bra{a_i}$ is called a bra. Technically this is a <a href=https://en.wikipedia.org/wiki/Dual_space>dual vector</a>, a linear functional from the vector space to the corresponding field $\mathbb{C}$. It has the property that if we multiply it by a regular vector, so a ket, from the right side it returns the inner product. Since the eigenvectors form an orthonormal basis we have:</p>$$
+\braket{a_i|a_j} = \delta_{ij}.
+$$<p>Now we can define quantum measurement, which is a probabilistic process. If we have state $\ket{\psi}$ and we measure it using observable $A$ we will get as measurement value one of the eigenvalues $a_i$ of that observable. The corresponding probability is given by:</p>$$
+P(a_i) = \left|\braket{a_i|\psi}\right|^2.
+$$<p>Of course the total probability over all possible outcomes should add up to 1, and this is guaranteed because $\ket{\psi}$ is a normalized vector. We can see this by writing $\ket{\psi}$ as a linear combination of the eigenvectors of the observable:</p>$$
+\ket{\psi} = \sum_i \alpha_i \ket{a_i},
+$$<p>and because $\ket{\psi}$ is normalized we have</p>$$
+\begin{aligned}
+1 = \braket{\psi|\psi} &= \sum_i \sum_j \bar{\alpha_i} \alpha_j \braket{a_i|a_j} \\
+&= \sum_i \sum_j \bar{\alpha_i} \alpha_j \delta_{ij} \\
+&= \sum_i |\alpha_i|^2.
+\end{aligned}
+$$<p>Using the same decomposition of $\ket{\psi}$ we can rewrite the probability as:</p>$$
+P(a_i) = \left|\braket{a_i|\psi}\right|^2 = \left|\sum_j \alpha_j \braket{a_i|a_j}\right|^2 = |\alpha_i|^2,
+$$<p>so indeed we have</p>$$
+\sum_i P(a_i) = 1.
+$$<p>In the process of measurement the state <a href=https://en.wikipedia.org/wiki/Wave_function_collapse>collapses</a> to the eigenvector corresponding to the measured value, so if we measure value $a_i$, then $\ket{\psi} \rightarrow \ket{a_i}$.</p><h2 id=single-qubit-systems>Single qubit systems<a hidden class=anchor aria-hidden=true href=#single-qubit-systems>#</a></h2><p>As we saw, states in quantum mechanics can be represented as normalized vectors in some complex Hilbert space. For a single qubit system this is the 2-dimensional Hilbert space $\mathbb{C}^2$. Any (pure) qubit state can be written as:</p>$$
+\ket{\psi} = \alpha \ket{0} + \beta \ket{1}, \, \text{with} \, |\alpha|^2+|\beta|^2 = 1,
+$$<p>with $\ket{0}$ and $\ket{1}$ the standard orthonormal basis vectors in the <a href=https://en.wikipedia.org/wiki/Qubit#Standard_representation>computational basis</a> and $\alpha$ and $\beta$ complex coefficients. In standard vector notation we can write:</p>$$
+\ket{\psi} = \alpha \begin{bmatrix}
+1 \\
+0
+\end{bmatrix} + \beta \begin{bmatrix}
+0 \\
+1
+\end{bmatrix} = \begin{bmatrix}
+\alpha \\
+\beta
+\end{bmatrix}.
+$$<p>As discussed earlier measurement is implemented using a Hermitian operator. In $\mathbb{C}^2$ Hermitian operators can be written as <a href=https://en.wikipedia.org/wiki/Hermitian_matrix>Hermitian matrices</a>, a square matrix that equals its own conjugate transpose, so $a_{ij} = \overline{a_{ji}}$. This is typically written as:</p>$$
+A = A^{\dagger}.
+$$<p>The standard measurement in the computational basis is using the Pauli-Z operator, which is Hermitian:</p>$$
+Z = \begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+$$<p>The eigenvectors of this operator are exactly the standard basis vectors of the computational basis with corresponding eigenvalues -1 and +1:</p>$$
+\begin{aligned}
+Z \ket{0} &= \ket{0} \\
+Z \ket{1} &= -\ket{1} \\
+\end{aligned}
+$$<p>when applied to an arbitrary qubit we get:</p>$$
+Z \left[\alpha \ket{0} + \beta \ket{1} \right] = \alpha \ket{0} - \beta \ket{1},
+$$<p>so the measurement will return eigenvalue +1 with probability $|\alpha|^2$ and -1 with probability $|\beta|^2$. Due to the normalization this adds up to total probability 1, as expected. The outcome with eigenvalue +1 is identified with bit value 0 and the outcome with eigenvalue -1 with bit value 1.</p><h3 id=bloch-sphere>Bloch sphere<a hidden class=anchor aria-hidden=true href=#bloch-sphere>#</a></h3><p>A single qubit state is normalized, and the global phase does not have any physical significance. This implies we can identify any state, up to the phase, with a point on the two-dimensional sphere, the so-called <a href=https://en.wikipedia.org/wiki/Bloch_sphere>Bloch sphere</a> representation. The basis vectors $\ket{0}$ and $\ket{1}$ are mapped to the north pole and south pole respectively:</p><figure class=align-center><img loading=lazy src=Bloch_Sphere_representation.svg#center alt="Bloch sphere" width=50%><figcaption><p>Bloch sphere</p></figcaption></figure><p>The state is parametrized with the angles $\theta$ and $\varphi$.</p><h3 id=single-qubit-quantum-logic-gates>Single qubit quantum logic gates<a hidden class=anchor aria-hidden=true href=#single-qubit-quantum-logic-gates>#</a></h3><p>The simplest quantum logic gates operate on a single qubit. As mentioned before each quantum gate is represented using a unitary operator.</p><h4 id=identity-gate>Identity gate<a hidden class=anchor aria-hidden=true href=#identity-gate>#</a></h4><p>A special case is the identity operator, which is not changing the state at all, but can be handy in terms of notation. It is represented by the identity matrix:</p>$$
+I = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}.
+$$<h4 id=pauli-gates>Pauli gates<a hidden class=anchor aria-hidden=true href=#pauli-gates>#</a></h4><p>The most common non-trivial gates are the 3 Pauli gates:</p>$$
+\begin{aligned}
+X = \operatorname{NOT} & = \sigma_x = \begin{bmatrix}
+0 & 1 \\
+1 & 0
+\end{bmatrix} \\
+Y & = \sigma_y = \begin{bmatrix}
+0 & -i \\
+i & 0
+\end{bmatrix} \\
+Z & = \sigma_z = \begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\end{aligned}
+$$<p>The $X$ gate is also called the $\operatorname{NOT}$ gate since it flips $\ket{0}$ and $\ket{1}$:</p>$$
+X \ket{0} = \ket{1}, \quad X \ket{1} = \ket{0}.
+$$<p>The $Y$ gate also flips $\ket{0}$ and $\ket{1}$, but additionally introduces a phase flip:</p>$$
+Y \ket{0} = i \ket{1}, \quad Y \ket{1} = -i \ket{0}.
+$$<p>The $Z$ gate leaves $\ket{0}$ unchanged and flips $\ket{1}$:</p>$$
+Z \ket{0} = \ket{0}, \quad Z \ket{1} = - \ket{1}.
+$$<p>Note that the $Z$ gate is the same operator as the observable used for measurement. This can happen because the operator is both unitary and Hermitian. This is not generally true, but for the Pauli operators it is.</p><h4 id=hadamard-gate>Hadamard gate<a hidden class=anchor aria-hidden=true href=#hadamard-gate>#</a></h4><p>Another common gate is the Hadamard gate. This operator acts on the standard basis by creating a superposition:</p>$$
+\begin{aligned}
+H \ket{0} &= \ket{+} = \frac{1}{\sqrt{2}} \left(\ket{0} + \ket{1}\right) \\
+H \ket{1} &= \ket{-} = \frac{1}{\sqrt{2}} \left(\ket{0} - \ket{1}\right)
+\end{aligned}
+$$<p>Its matrix representation is given by</p>$$
+H = \frac{1}{\sqrt{2}} \begin{bmatrix}
+1 & 1 \\
+1 & -1
+\end{bmatrix}.
+$$<p>As we will see this gate is used for creating (maximally) entangled qubits.</p><h4 id=phase-shift-gates>Phase shift gates<a hidden class=anchor aria-hidden=true href=#phase-shift-gates>#</a></h4><p>The general phase shift gate is given by</p>$$
+P(\varphi) = \begin{bmatrix}
+1 & 0 \\
+0 & e^{i\varphi}
+\end{bmatrix},
+$$<p>so rather than a specific gate this is a parametrized family of gates. It shifts the phase between the qubits, by leaving $\ket{0}$ untouched and phase shifting $\ket{1}$ by $\varphi$. Some special cases of $\varphi$ are given by:</p>$$
+\begin{aligned}
+Z &= P\left(\pi \right) &= \begin{bmatrix}
+1 & 0 \\
+0 & e^{i\pi}
+\end{bmatrix} &= \begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix} \\
+S &= P\left(\frac{\pi}{2}\right) &= \begin{bmatrix}
+1 & 0 \\
+0 & e^{i \frac{\pi}{2}}
+\end{bmatrix} &= \begin{bmatrix}
+1 & 0 \\
+0 & i
+\end{bmatrix} \\
+T &= P\left(\frac{\pi}{4}\right) &= \begin{bmatrix}
+1 & 0 \\
+0 & e^{i \frac{\pi}{4}}
+\end{bmatrix} &= \begin{bmatrix}
+1 & 0 \\
+0 & e^{i \frac{\pi}{4}}
+\end{bmatrix} \\
+\end{aligned}
+$$<p>so the $Z$ gate can be seen as a special case of the phase shift gates. Also notice that $S$ and $T$ are unitary, but they are not Hermitian, which is directly clear from the complex values on the diagonal.</p><h4 id=rotation-gates>Rotation gates<a hidden class=anchor aria-hidden=true href=#rotation-gates>#</a></h4><p>The rotation gates are defined as rotations of a specified angle around one of axis of the Bloch sphere. They are parametrized by an angle. The actions on the basis vector are given by:</p>$$
+\begin{aligned}
+R_x(\theta) \ket{0} &= \cos \left( \frac{\theta}{2} \right) \ket{0} - i \sin \left( \frac{\theta}{2} \right) \ket{1} \\
+R_x(\theta) \ket{1} &= - i \sin \left( \frac{\theta}{2} \right) \ket{0} + \cos \left( \frac{\theta}{2} \right) \ket{1} \\
+R_y(\theta) \ket{0} &= \cos \left( \frac{\theta}{2} \right) \ket{0} + \sin \left( \frac{\theta}{2} \right) \ket{1} \\
+R_y(\theta) \ket{1} &= - \sin \left( \frac{\theta}{2} \right) \ket{0} + \cos \left( \frac{\theta}{2} \right) \ket{1} \\
+R_z(\varphi) \ket{0} &= \exp \left(- \frac{i \varphi}{2} \right) \ket{0} \\
+R_z(\varphi) \ket{1} &= \exp \left(\frac{i \varphi}{2} \right) \ket{1} \\
+\end{aligned}
+$$<p>If we ignore the global phase we can create any arbitrary single qubit state with just a single $R_y$ and $R_z$ transformation. Assume we have state</p>$$ \psi = \alpha \ket{0} + \beta \ket{1}, $$<p>since we ignore the global phase we can write $\alpha = \cos \theta$ and $\beta = e^{i \varphi} \sin \theta$ (note that $|\alpha|^2+|\beta|^2 = 1$ as expected). If we start out with $\ket{0}$ we can now write:</p>$$
+\begin{aligned}
+\tilde{\psi} &= R_z(\varphi) R_y(\theta) \ket{0} \\
+&= R_z(\varphi) \left( \cos \left( \frac{\theta}{2} \right) \ket{0} + \sin \left( \frac{\theta}{2} \right) \ket{1} \right) \\
+&= \exp \left(- \frac{i \varphi}{2} \right) \cos \left( \frac{\theta}{2} \right) \ket{0} + \exp \left(\frac{i \varphi}{2} \right) \sin \left( \frac{\theta}{2} \right) \ket{1},
+\end{aligned}
+$$<p>so we have $\psi = \exp \left(\frac{i \varphi}{2} \right) \tilde{\psi}$.</p><h3 id=visualization-and-simulation>Visualization and simulation<a hidden class=anchor aria-hidden=true href=#visualization-and-simulation>#</a></h3><p>One way to visualize and simulate quantum circuits is <a href=https://quantum.cloud.ibm.com/composer>IBM Quantum Composer</a>. You can draw the circuits by drag-and-dropping the gates.</p><p>An example circuit is given by:</p><figure class=align-center><img loading=lazy src=composer_simple.svg#center alt="Simple quantum circuit" width=100%><figcaption><p>Simple quantum circuit</p></figcaption></figure><p>In this example we chose $\theta = 2 \arccos 0.6 \approx 1.854590436$, then $\cos \theta = 0.6$ and $\sin \theta = 0.8$. The phase disk show the probability of getting $\ket{1}$ at the given point in the circuit. The circuit can be described as:</p>$$
+\begin{aligned}
+\ket{\psi} &= H X R_y (\theta) \ket{0} \\
+&= H X \left(0.6 \ket{0} + 0.8 \ket{1} \right) \\
+&= H \left ( 0.8 \ket{0} + 0.6 \ket{1} \right) \\
+&= \frac{0.8}{\sqrt{2}} (\ket{0} + \ket{1}) + \frac{0.6}{\sqrt{2}} (\ket{0} - \ket{1}) \\
+&= \frac{1.4}{\sqrt{2}} \ket{0} + \frac{0.2}{\sqrt{2}} \ket{1}
+\end{aligned}
+$$<p>The final probability for $\ket{0}$ is $\left(\frac{0.2}{\sqrt{2}}\right)^2 = 0.02$.</p><p>The circuit can be generated using the script:</p><pre tabindex=0><code>OPENQASM 2.0;
+include &#34;qelib1.inc&#34;;
+
+qreg q[1];
+barrier q; // @phaseDisk
+ry(1.854590436) q[0];
+barrier q; // @phaseDisk
+x q[0];
+barrier q; // @phaseDisk
+h q[0];
+barrier q; // @phaseDisk
+</code></pre><p>In this case we only have qubits in the simulation. Later on we also add classical bits, when we create a circuit to simulate quantum teleportation.</p><h2 id=multi-qubit-systems>Multi-qubit systems<a hidden class=anchor aria-hidden=true href=#multi-qubit-systems>#</a></h2><p>In order to create more interesting, entangled, states we need two-qubit quantum logic gates. This means we need to enlarge the Hilbert space from two-dimensional to a 4-dimensional system. This can be achieved by taking the <a href=https://en.wikipedia.org/wiki/Tensor_product_of_Hilbert_spaces>tensor product</a> of the two small systems. Different notations can be used. We now have four canonical basis vectors, for example:</p>$$
+\ket{0} \otimes \ket{1} = \ket{0}\ket{1} = \ket{0,1} = \ket{01},
+$$<p>The first form shows explicitly the tensor product and is most precise, but this becomes tedious especially when even more qubits are involved. We will stick with the most compact form $\ket{01}$, which works as long as the labels are not ambiguous.</p><p>Sometimes subscript labels are used to explicitly show which qubit is acted on, for example</p>$$
+\ket{\psi}_{AB} = \ket{0}_A \ket{1}_B.
+$$<p>A general two-qubit state can be written as</p>$$ \ket{\psi} = \alpha \ket{00} + \beta \ket{01} + \gamma \ket{10} + \delta \ket{11}, $$<p>where the four coefficients are complex numbers. Again the state needs to be normalized, so</p>$$ |\alpha|^2+|\beta|^2+|\gamma|^2+|\delta|^2 = 1. $$<p>This directly generalizes to a larger number of qubits, with the number of dimensions growing like $2^n$ where $n$ is the number of qubits.</p><h3 id=two-qubit-quantum-logic-gates>Two-qubit quantum logic gates<a hidden class=anchor aria-hidden=true href=#two-qubit-quantum-logic-gates>#</a></h3><p>A trivial example of a two-qubit quantum logic gate leaves one of the qubits untouched. If we label the qubits $A$ and $B$ and apply the $Z$ operator to the first qubit. This can be written as:</p>$$
+\begin{aligned}
+(Z_A \otimes I_B) \ket{\psi} &= (Z_A \otimes I_B) \left[ \alpha \ket{0}_A \ket{0}_B + \beta \ket{0}_A \ket{1}_B + \gamma \ket{1}_A \ket{0}_B + \delta \ket{1}_A \ket{1}_B \right] \\
+&= \alpha Z_A \ket{0}_A I_B \ket{0}_B + \beta Z_A \ket{0}_A I_B \ket{1}_B + \gamma Z_A \ket{1}_A I_B \ket{0}_B + \delta Z_A \ket{1}_A I_B \ket{1}_B \\
+&= \alpha \ket{0}_A \ket{0}_B + \beta \ket{0}_A \ket{1}_B - \gamma \ket{1}_A \ket{0}_B - \delta \ket{1}_A \ket{1}_B
+\end{aligned}
+$$<p>This looks quite messy, but all it does is flipping the sign for terms containing $\ket{1}_A$ and leaving the second qubit untouched.</p><p>We can write this in standard matrix notation as well, first we write the orthonormal basis vectors in the standard computational bases as:</p>$$
+\ket{00} = \begin{bmatrix}
+1 \\ 0 \\ 0 \\ 0 \\
+\end{bmatrix},
+\ket{01} = \begin{bmatrix}
+0 \\ 1 \\ 0 \\ 0 \\
+\end{bmatrix},
+\ket{10} = \begin{bmatrix}
+0 \\ 0 \\ 1 \\ 0 \\
+\end{bmatrix},
+\ket{11} = \begin{bmatrix}
+0 \\ 0 \\ 0 \\ 1 \\
+\end{bmatrix}.
+$$<p>Looking at how $Z_A \otimes I_B$ acts on those basis vectors, we can write</p>$$
+Z_A \otimes I_B = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & -1 & 0 \\
+0 & 0 & 0 & -1 \\
+\end{bmatrix}.
+$$<p>If we would transform the second qubit instead we get</p>$$
+I_A \otimes Z_B = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & -1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & -1 \\
+\end{bmatrix}.
+$$<p>Similarly we can write out the transformations for the $X$ operator:</p>$$
+X_A \otimes I_B = \begin{bmatrix}
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 1 \\
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+\end{bmatrix},
+$$<p>and</p>$$
+I_A \otimes X_B = \begin{bmatrix}
+0 & 1 & 0 & 0 \\
+1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+\end{bmatrix}.
+$$<p>Note that some of these transformations have a block-diagonal representation and others do not, but none of them are entangling the qubits.</p><h4 id=controlled-gates>Controlled gates<a hidden class=anchor aria-hidden=true href=#controlled-gates>#</a></h4><p>Things get more interesting if we introduce entanglement between the qubits. A common gate is the $\operatorname{CNOT}$ gate, or controlled-$\operatorname{NOT}$ gate. It has two input qubits, the control qubit and the target qubit. Depending on the state of the control qubit it applies the $\operatorname{NOT}$ gate from before to the target qubit, or leave it untouched.</p><p>This operator acts on the standard basis vectors as:</p>$$
+\operatorname{CNOT} \ket{00} = \ket{00}, \\
+\operatorname{CNOT} \ket{01} = \ket{01}, \\
+\operatorname{CNOT} \ket{10} = \ket{11}, \\
+\operatorname{CNOT} \ket{11} = \ket{10}.
+$$<p>The corresponding matrix in the standard basis is given by</p>$$
+\operatorname{CNOT} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0 \\
+\end{bmatrix}.
+$$<p>This can also be written as the block matrix system</p>$$
+\operatorname{CNOT} = \begin{bmatrix}
+I & 0 \\
+0 & X \\
+\end{bmatrix}.
+$$<p>Again this is a block diagonal matrix, but this operator does introduce entanglement between the two qubits. In the next section a measure for the entanglement will be introduced. Sometimes the operator will be written as $\operatorname{CX}$.</p><p>The concept of controlled gates can be applied to other single qubit gates as well, for example the controlled $Z$ gate, $\operatorname{CZ}$, which can be represented as:</p>$$
+\operatorname{CZ} = \begin{bmatrix}
+I & 0 \\
+0 & Z \\
+\end{bmatrix},
+$$<p>conditionally applying the $Z$ operator to the target qubit depending on the value of the control qubit:</p>$$
+\begin{aligned}
+\operatorname{CZ} \ket{00} &= \ket{00}, \\
+\operatorname{CZ} \ket{01} &= \ket{01}, \\
+\operatorname{CZ} \ket{10} &= \ket{10}, \\
+\operatorname{CZ} \ket{11} &= -\ket{11}.
+\end{aligned}
+$$<p>The matrix notation becomes:</p>$$
+\operatorname{CZ} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & -1 \\
+\end{bmatrix}.
+$$<p>So each single qubit gate induces a two-qubit gate by using the induced controlled gate.</p><h3 id=entanglement-between-qubits>Entanglement between qubits<a hidden class=anchor aria-hidden=true href=#entanglement-between-qubits>#</a></h3><p>Multi-qubit operators can introduce entanglement, but it is more clear to think about entanglement in terms of the state itself. Entanglement is defined in terms of a tensor-product decomposition of the Hilbert space the state lives in.</p><p>As mentioned before when looking at a two-qubit system we take the tensor product of the original complex Hilbert spaces, resulting in a 4-dimensional complex Hilbert space. The space is equal to the span of the standard basis vectors. This can be written explicitly as:</p>$$
+\mathbb{C}^4 \cong \mathbb{C}^2 \otimes \mathbb{C}^2 = \text{span} \left\{ \ket{0} \otimes \ket{0}, \ket{1} \otimes \ket{0}, \ket{0} \otimes \ket{1}, \ket{1} \otimes \ket{1} \right\}.
+$$<p>A state is called entangled if it cannot be written as the tensor product of two single-qubit states. Another way of saying it is that the state must be decomposable as a tensor product of states in the two subsystems, so:</p>$$
+\ket{\psi} = \ket{\psi}_A \otimes \ket{\psi}_B
+$$<p>for some $\ket{\psi}_A$ and $\ket{\psi}_B$.</p><p>Clearly the basis vectors or any multiple of them are not entangled. Another example of a non-entangled state is:</p>$$
+\ket{\psi} = \ket{+}_A \otimes \ket{0}_B = \frac{1}{\sqrt{2}}\left( \ket{0}_A + \ket{1}_A \right) \otimes \ket{0}_B = \frac{1}{\sqrt{2}} \left( \ket{00} + \ket{10} \right).
+$$<p>This can intuitively be understood by factoring out $\ket{0}$ on the right (remember tensor products are generally not commutative).</p><p>To see what an entangled state looks like we can operate on the previous non-entangled example with the $\operatorname{CNOT}$ gate. The control qubit $\ket{+}$ is in a super position, resulting in a new state:</p>$$
+\ket{\Phi^+} = \operatorname{CNOT} \ket{\psi} = \frac{1}{\sqrt{2}} \left( \operatorname{CNOT} \ket{00} + \operatorname{CNOT} \ket{10} \right) = \frac{1}{\sqrt{2}} \left( \ket{00} + \ket{11} \right).
+$$<p>This is a <a href=https://en.wikipedia.org/wiki/Bell_state>Bell state</a>. To see that $\ket{\Phi^+}$ is entangled, assume it is not entangled but separable and we can write it as:</p>$$
+\ket{\Phi^+} = \left(\alpha \ket{0} + \beta \ket{1} \right) \left(\gamma \ket{0} + \delta \ket{1} \right),
+$$<p>this is the most general separable state. Now equating like terms we need to have</p>$$
+\begin{aligned}
+\alpha \gamma = \frac{1}{\sqrt{2}}, \, \, \alpha \delta = 0, \, \,\beta \gamma = 0, \, \, \beta \delta = \frac{1}{\sqrt{2}},
+\end{aligned}
+$$<p>which is clearly impossible since either $\alpha=0$ or $\delta=0$, so we can never have $\alpha \gamma = \beta \delta = \frac{1}{\sqrt{2}}$, hence $\ket{\Phi^+}$ is inseparable and thus an entangled state (as we will see it is actually maximally entangled).</p><p>There are different measures of quantifying the degree of entanglement, so-called <a href=https://en.wikipedia.org/wiki/Entanglement_monotone>entanglement monotones</a>. When having a system of two qubits a common way is the <a href=https://en.wikipedia.org/wiki/Concurrence_(quantum_computing)>concurrence</a>. Another common measure is the <a href=https://en.wikipedia.org/wiki/Von_Neumann_entropy>von Neumann entropy</a>, which is more general and can be used as a measure of statistical uncertainty for mixed states and larger systems as well.</p><p>The concurrence can be used for pure and mixed states. When looking at the general pure state</p>$$ \ket{\psi} = \alpha \ket{00} + \beta \ket{01} + \gamma \ket{10} + \delta \ket{11}, $$<p>the concurrence is given by:</p>$$
+C(\ket{\psi}) = 2 |\alpha \delta - \beta \gamma|.
+$$<p>When $C=0$ the state is separable and thus non-entangled. For $C=1$ the state is maximally entangled, and for $0&lt;C&lt;1$ it is partially entangled. When applying to the Bell state $\ket{\Psi^+}$ this gives</p>$$ C(\ket{\Psi^+}) = 2 \left| \frac{1}{\sqrt{2}} \cdot \frac{1}{\sqrt{2}} - 0 \cdot 0 \right| = 1, $$<p>so indeed the Bell state is maximally entangled. There are exactly four maximally entangled Bell states (up to global phase):</p>$$
+\begin{aligned}
+\ket{\Phi^+} &= \frac{1}{\sqrt{2}} ( \ket{00} + \ket{11}), \\
+\ket{\Phi^-} &= \frac{1}{\sqrt{2}} ( \ket{00} - \ket{11}), \\
+\ket{\Psi^+} &= \frac{1}{\sqrt{2}} ( \ket{01} + \ket{10}), \\
+\ket{\Psi^-} &= \frac{1}{\sqrt{2}} ( \ket{01} - \ket{10}). \\
+\end{aligned}
+$$<p>They form an orthonormal basis, which can be easily seen by writing:</p>$$
+\begin{aligned}
+\ket{00} &= \frac{1}{\sqrt{2}} ( \ket{\Phi^+} + \ket{\Phi^-} ), \\
+\ket{01} &= \frac{1}{\sqrt{2}} ( \ket{\Psi^+} + \ket{\Psi^-} ), \\
+\ket{10} &= \frac{1}{\sqrt{2}} ( \ket{\Psi^+} - \ket{\Psi^-} ), \\
+\ket{11} &= \frac{1}{\sqrt{2}} ( \ket{\Phi^+} - \ket{\Phi^-} ).
+\end{aligned}
+$$<p>As we will see Bell states play a crucial role in quantum teleportation.</p><h2 id=quantum-teleportation>Quantum Teleportation<a hidden class=anchor aria-hidden=true href=#quantum-teleportation>#</a></h2><p><a href=https://en.wikipedia.org/wiki/Quantum_teleportation>Quantum teleportation</a> is about transferring quantum information from a sender to a receiver. We will have a look at a simple example of transferring a single qubit state. Following the <a href=https://en.wikipedia.org/wiki/No-cloning_theorem>no-cloning theorem</a> it is impossible to create a copy of an arbitrary quantum state, so in the process of transferring the quantum state the original state will be destroyed.</p><h3 id=formal-description>Formal description<a hidden class=anchor aria-hidden=true href=#formal-description>#</a></h3><p>Traditionally we have a sender Alice and a receiver Bob. Alice has a qubit $C$ which she prepared in an arbitrary (potentially unknown) quantum state. The goal is to transfer the state of that qubit to another qubit $B$ in Bob&rsquo;s possession. In the process Alice uses a third auxiliary qubit $A$. Alice and Bob also need to communicate two classical bits of information.</p><p>So Alice possesses a qubit $C$ in an arbitrary state:</p>$$
+\ket{\psi}_C = \alpha \ket{0}_C + \beta \ket{1}_C.
+$$<p>The other two qubits are prepared to be in one of the Bell states, say:</p>$$
+\ket{\Phi^+}_{AB} = \frac{1}{\sqrt{2}} ( \ket{0}_A \ket{0}_B + \ket{1}_A \ket{1}_B),
+$$<p>these qubits can be prepared anywhere as long as $A$ is sent to Alice and $B$ to Bob. This can be rewritten in terms of $A$ and $C$, the qubits that Alice has:</p>$$
+\begin{aligned}
+\ket{\psi}_C \ket{\Phi^+}_{AB} = & \frac{1}{\sqrt{2}} \left( \alpha \ket{0}_C + \beta \ket{1}_C \right) ( \ket{0}_A \ket{0}_B + \ket{1}_A \ket{1}_B) \\
+= & \frac{1}{\sqrt{2}} \left[ \alpha \ket{0}_C ( \ket{0}_A \ket{0}_B + \ket{1}_A \ket{1}_B) + (\beta \ket{1}_C \ket{0}_A \ket{0}_B + \ket{1}_A \ket{1}_B) \right] \\
+= & \frac{1}{2} \left[ \ket{\Phi^+}_{CA} (\alpha \ket{0}_B + \beta \ket{1}_B) + \ket{\Phi^-}_{CA} (\alpha \ket{0}_B - \beta \ket{1}_B) + \right. \\
+& \left. \ket{\Psi^+}_{CA} (\alpha \ket{1}_B + \beta \ket{0}_B) + \ket{\Psi^-}_{CA} (\alpha \ket{1}_B - \beta \ket{0}_B) \right] \\
+\end{aligned}
+$$<p>You could say the entanglement has moved from $AB$ to $CA$, even though nothing has really changed, the state has just been rewritten.</p><p>Now Alice will measure her state in the Bell basis, or equivalently, map the state to the computational basis and do the measurement in the computational basis.</p><p>We already saw how $\ket{\Phi^+}$ is created from gates $H$ and $\operatorname{CNOT}$, the other Bell states are similar:</p>$$
+\begin{aligned}
+\ket{\Phi^+} &= \frac{1}{\sqrt{2}} \operatorname{CNOT} ( \ket{00}_{AB} + \ket{10}_{AB} ) &= \operatorname{CNOT} H_A \ket{00}_{AB}, \\
+\ket{\Phi^-} &= \frac{1}{\sqrt{2}} \operatorname{CNOT} ( \ket{00}_{AB} - \ket{10}_{AB} ) &= \operatorname{CNOT} H_A \ket{10}_{AB}, \\
+\ket{\Psi^+} &= \frac{1}{\sqrt{2}} \operatorname{CNOT} ( \ket{01}_{AB} + \ket{11}_{AB} ) &= \operatorname{CNOT} H_A \ket{01}_{AB}, \\
+\ket{\Psi^-} &= \frac{1}{\sqrt{2}} \operatorname{CNOT} ( \ket{01}_{AB} - \ket{11}_{AB} ) &= \operatorname{CNOT} H_A \ket{11}_{AB}. \\
+\end{aligned}
+$$<p>So if Alice applies the operations $H_C \operatorname{CNOT}_{CA}$ the state is transformed to:</p>$$
+\begin{aligned}
+H_C \operatorname{CNOT}_{CA} \ket{\psi}_C \ket{\Phi^+}_{AB} = & \frac{1}{2} \left[ \ket{00}_{CA} (\alpha \ket{0}_B + \beta \ket{1}_B) + \ket{10}_{CA} (\alpha \ket{0}_B - \beta \ket{1}_B) + \right. \\
+& \left. \ket{01}_{CA} (\alpha \ket{1}_B + \beta \ket{0}_B) + \ket{11}_{CA} (\alpha \ket{1}_B - \beta \ket{0}_B) \right]. \\
+\end{aligned}
+$$<p>She then performs the measurement. With equal probabilities $\frac{1}{4}$ the state collapses to:</p>$$
+\begin{aligned}
+\ket{\psi} &= \ket{00}_{CA} (\alpha \ket{0}_B + \beta \ket{1}_B) \\
+\ket{\psi} &= \ket{10}_{CA} (\alpha \ket{0}_B - \beta \ket{1}_B) \\
+\ket{\psi} &= \ket{01}_{CA} (\alpha \ket{1}_B + \beta \ket{0}_B) \\ \ket{\psi} &= \ket{11}_{CA} (\alpha \ket{1}_B - \beta \ket{0}_B). \\
+\end{aligned}
+$$<p>Note that the state is no longer entangled. Alice measures the classical bits $00$, $10$, $01$ and $11$ respectively. She communicates these bits to Bob, who will then correct his local state so he ends up with $\psi_B = \alpha \ket{0}_B + \beta \ket{1}_B$. In particular he applies:</p>$$
+\begin{aligned}
+I & \, \, \text{if} \, \, 00, \\
+Z & \, \, \text{if} \, \, 10, \\
+X & \, \, \text{if} \, \, 01, \\
+ZX & \, \, \text{if} \, \, 11.
+\end{aligned}
+$$<p>With these conditional corrections the state changes to:</p>$$
+\begin{aligned}
+\ket{\psi} &= \ket{00}_{CA} I_B (\alpha \ket{0}_B + \beta \ket{1}_B) = \ket{00}_{CA} \ket{\psi}_B \\
+\ket{\psi} &= \ket{10}_{CA} Z_B (\alpha \ket{0}_B - \beta \ket{1}_B) = \ket{10}_{CA} \ket{\psi}_B \\
+\ket{\psi} &= \ket{01}_{CA} X_B (\alpha \ket{1}_B + \beta \ket{0}_B) = \ket{01}_{CA} \ket{\psi}_B \\
+\ket{\psi} &= \ket{11}_{CA} Z_B X_B (\alpha \ket{1}_B - \beta \ket{0}_B) = \ket{11}_{CA} \ket{\psi}_B, \\
+\end{aligned}
+$$<p>so in all cases Bob ends up with local state $\ket{\psi}_B$. This was exactly the goal of the teleportation. As expected Alice no longer has her original state, it has been destroyed in the process.</p><h3 id=visualization-in-ibm-quantum-composer>Visualization in IBM Quantum Composer<a hidden class=anchor aria-hidden=true href=#visualization-in-ibm-quantum-composer>#</a></h3><p>A circuit that implements the teleportation is given by:</p><figure class=align-center><img loading=lazy src=composer_teleportation.svg#center alt="Quantum teleportation" width=100%><figcaption><p>Quantum teleportation</p></figcaption></figure><p>Here <code>q[0]</code> is the qubit in the original state in possession of Alice. After the teleportation qubit <code>q[2]</code> contains the original state.</p><p>This circuit can be generated with this script:</p><pre tabindex=0><code>OPENQASM 2.0;
+include &#34;qelib1.inc&#34;;
+
+qreg q[3];
+creg c1x[1];
+creg cx1[1];
+
+// State prepared by Alice
+ry(1.854590436) q[0];
+
+// Creation of Bell state
+h q[1];
+cx q[1], q[2];
+
+barrier q; // @phaseDisk
+
+// Basis change by Alice
+cx q[0], q[1];
+h q[0];
+
+// Measure by Alice
+measure q[0] -&gt; cx1[0];
+measure q[1] -&gt; c1x[0];
+
+// Conditional corrections by Bob
+if (c1x == 1) x q[2];
+if (cx1 == 1) z q[2];
+
+barrier q; // @phaseDisk
+</code></pre><h2 id=simulation-in-python>Simulation in Python<a hidden class=anchor aria-hidden=true href=#simulation-in-python>#</a></h2><p>We can simulate a quantum circuit in Python using IBM&rsquo;s <a href=https://www.ibm.com/quantum/qiskit>Qiskit</a> package. The work can be broken up into two parts:</p><ol><li>Create the circuits out of the qubits, classical bits, individual gates and measurement operations,</li><li>Run the circuit using one of the backends. There are multiple back-ends with different properties. You can either run them on a real quantum computer or use a simulator.</li></ol><p>Inside IBM Quantum Composer we can get generated Python code for the circuit. For the given teleportation circuit this results in:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit</span> <span class=kn>import</span> <span class=n>QuantumRegister</span><span class=p>,</span> <span class=n>ClassicalRegister</span><span class=p>,</span> <span class=n>QuantumCircuit</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>numpy</span> <span class=kn>import</span> <span class=n>pi</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>qreg_q</span> <span class=o>=</span> <span class=n>QuantumRegister</span><span class=p>(</span><span class=mi>3</span><span class=p>,</span> <span class=s1>&#39;q&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>creg_c1x</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;c1x&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>creg_cx1</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;cx1&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span> <span class=o>=</span> <span class=n>QuantumCircuit</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>,</span> <span class=n>creg_c1x</span><span class=p>,</span> <span class=n>creg_cx1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># State prepared by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>ry</span><span class=p>(</span><span class=mf>1.854590436</span><span class=p>,</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=c1># Creation of Bell state</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>h</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>cx</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>rz</span><span class=p>(</span><span class=n>pi</span> <span class=o>/</span> <span class=mi>3</span><span class=p>,</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>barrier</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># @phaseDisk</span>
+</span></span><span class=line><span class=cl><span class=c1># Basis change by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>cx</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>h</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=c1># Measure by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>creg_cx1</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>creg_c1x</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=c1># Conditional corrections by Bob</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>x</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span><span class=o>.</span><span class=n>c_if</span><span class=p>(</span><span class=n>creg_c1x</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>z</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span><span class=o>.</span><span class=n>c_if</span><span class=p>(</span><span class=n>creg_cx1</span><span class=p>,</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>barrier</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># @phaseDisk</span>
+</span></span></code></pre></td></tr></table></div></div><p>Unfortunately the code generated is for Qiskit 1, in Qiskit 2 the <code>c_if</code> function is <a href=https://quantum.cloud.ibm.com/docs/en/guides/qiskit-2.0#removal-of-legacy-c_if-conditions>removed</a>, so this code gives an error:</p><pre tabindex=0><code>Exception has occurred: AttributeError
+&#39;InstructionSet&#39; object has no attribute &#39;c_if&#39;
+  File &#34;.../generated_teleportation.py&#34;, line 24, in &lt;module&gt;
+    circuit.x(qreg_q[2]).c_if(creg_c1x, 1)
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: &#39;InstructionSet&#39; object has no attribute &#39;c_if&#39;
+</code></pre><p>This can be fixed by using:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># Conditional corrections by Bob</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>circuit</span><span class=o>.</span><span class=n>if_test</span><span class=p>((</span><span class=n>creg_c1x</span><span class=p>,</span> <span class=mi>1</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>    <span class=n>circuit</span><span class=o>.</span><span class=n>x</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>circuit</span><span class=o>.</span><span class=n>if_test</span><span class=p>((</span><span class=n>creg_cx1</span><span class=p>,</span> <span class=mi>1</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>    <span class=n>circuit</span><span class=o>.</span><span class=n>z</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span></code></pre></div><p>We now only have the circuit defined, in order to add a back-end to simulate the circuit, import the required class and hook it up at the end of the code:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit_aer</span> <span class=kn>import</span> <span class=n>AerSimulator</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>backend</span> <span class=o>=</span> <span class=n>AerSimulator</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>compiled</span> <span class=o>=</span> <span class=n>transpile</span><span class=p>(</span><span class=n>circuit</span><span class=p>,</span> <span class=n>backend</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>results</span> <span class=o>=</span> <span class=n>backend</span><span class=o>.</span><span class=n>run</span><span class=p>(</span><span class=n>compiled</span><span class=p>,</span> <span class=n>shots</span><span class=o>=</span><span class=mi>100_000</span><span class=p>)</span><span class=o>.</span><span class=n>result</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>counts</span> <span class=o>=</span> <span class=n>results</span><span class=o>.</span><span class=n>get_counts</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>counts</span><span class=p>)</span>
+</span></span></code></pre></div><p>This will simulate the circuit 100,000 times and get the counts for the classical bits:</p><pre tabindex=0><code>{&#39;0 1&#39;: 24821, &#39;0 0&#39;: 25051, &#39;1 0&#39;: 25061, &#39;1 1&#39;: 25067}
+</code></pre><p>There are four outcomes each with around 25,000 occurrences. This is exactly what we expect, these are the measurement outcomes Alice got after mapping her qubits to the computational state. There is no measurement for Bob&rsquo;s qubit yet, let&rsquo;s add it by adding an additional classical bit:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=n>creg_a</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;a&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span> <span class=o>=</span> <span class=n>QuantumCircuit</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>,</span> <span class=n>creg_c1x</span><span class=p>,</span> <span class=n>creg_cx1</span><span class=p>,</span> <span class=n>creg_a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>...</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>],</span> <span class=n>creg_a</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span></code></pre></div><p>This results in an additional bit in the output:</p><pre tabindex=0><code>{&#39;1 0 0&#39;: 16053, &#39;0 1 0&#39;: 9106, &#39;0 0 0&#39;: 9147, &#39;0 0 1&#39;: 8816, &#39;1 0 1&#39;: 16023, &#39;1 1 0&#39;: 16063, &#39;0 1 1&#39;: 8995, &#39;1 1 1&#39;: 15797}
+</code></pre><p>We are not interested in the first 2 bits from Alice, so we can marginalize the counts, and only get the counts for Bob&rsquo;s bit:</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit.result.utils</span> <span class=kn>import</span> <span class=n>marginal_counts</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=o>...</span>
+</span></span><span class=line><span class=cl><span class=n>marginal_counts</span><span class=p>(</span><span class=n>counts</span><span class=p>,</span><span class=n>indices</span><span class=o>=</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span></code></pre></div><p>This results in:</p><pre tabindex=0><code>{&#39;0&#39;: 36011, &#39;1&#39;: 63989}
+</code></pre><p>As expected we get $0$ around 36% of the time and $1$ 64% of the time. The final, still mostly generated, code is:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit</span> <span class=kn>import</span> <span class=n>QuantumRegister</span><span class=p>,</span> <span class=n>ClassicalRegister</span><span class=p>,</span> <span class=n>QuantumCircuit</span><span class=p>,</span> <span class=n>transpile</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>numpy</span> <span class=kn>import</span> <span class=n>pi</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit_aer</span> <span class=kn>import</span> <span class=n>AerSimulator</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>qiskit.result.utils</span> <span class=kn>import</span> <span class=n>marginal_counts</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>qreg_q</span> <span class=o>=</span> <span class=n>QuantumRegister</span><span class=p>(</span><span class=mi>3</span><span class=p>,</span> <span class=s1>&#39;q&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>creg_c1x</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;c1x&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>creg_cx1</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;cx1&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>creg_a</span> <span class=o>=</span> <span class=n>ClassicalRegister</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=s1>&#39;a&#39;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span> <span class=o>=</span> <span class=n>QuantumCircuit</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>,</span> <span class=n>creg_c1x</span><span class=p>,</span> <span class=n>creg_cx1</span><span class=p>,</span> <span class=n>creg_a</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># State prepared by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>ry</span><span class=p>(</span><span class=mf>1.854590436</span><span class=p>,</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Creation of Bell state</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>h</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>cx</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>rz</span><span class=p>(</span><span class=n>pi</span> <span class=o>/</span> <span class=mi>3</span><span class=p>,</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>barrier</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># @phaseDisk</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Basis change by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>cx</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>h</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Measure by Alice</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>0</span><span class=p>],</span> <span class=n>creg_cx1</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>1</span><span class=p>],</span> <span class=n>creg_c1x</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Conditional corrections by Bob</span>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>circuit</span><span class=o>.</span><span class=n>if_test</span><span class=p>((</span><span class=n>creg_c1x</span><span class=p>,</span> <span class=mi>1</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>    <span class=n>circuit</span><span class=o>.</span><span class=n>x</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>with</span> <span class=n>circuit</span><span class=o>.</span><span class=n>if_test</span><span class=p>((</span><span class=n>creg_cx1</span><span class=p>,</span> <span class=mi>1</span><span class=p>)):</span>
+</span></span><span class=line><span class=cl>    <span class=n>circuit</span><span class=o>.</span><span class=n>z</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>barrier</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=c1># @phaseDisk</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># Measure Bob&#39;s qubit</span>
+</span></span><span class=line><span class=cl><span class=n>circuit</span><span class=o>.</span><span class=n>measure</span><span class=p>(</span><span class=n>qreg_q</span><span class=p>[</span><span class=mi>2</span><span class=p>],</span> <span class=n>creg_a</span><span class=p>[</span><span class=mi>0</span><span class=p>])</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>backend</span> <span class=o>=</span> <span class=n>AerSimulator</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>compiled</span> <span class=o>=</span> <span class=n>transpile</span><span class=p>(</span><span class=n>circuit</span><span class=p>,</span> <span class=n>backend</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>results</span> <span class=o>=</span> <span class=n>backend</span><span class=o>.</span><span class=n>run</span><span class=p>(</span><span class=n>compiled</span><span class=p>,</span> <span class=n>shots</span><span class=o>=</span><span class=mi>100_000</span><span class=p>)</span><span class=o>.</span><span class=n>result</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=n>counts</span> <span class=o>=</span> <span class=n>results</span><span class=o>.</span><span class=n>get_counts</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nb>print</span><span class=p>(</span><span class=n>marginal_counts</span><span class=p>(</span><span class=n>counts</span><span class=p>,</span> <span class=n>indices</span><span class=o>=</span><span class=p>[</span><span class=mi>2</span><span class=p>]))</span>
+</span></span></code></pre></td></tr></table></div></div></div><footer class=post-footer><ul class=post-tags></ul><nav class=paginav><a class=next href=https://dhmb.github.io/posts/solving-sudoku-with-answer-set-programming/><span class=title>Next »</span>
+<span>Answer Set Programming: Solving Sudoku</span></a></nav></footer></article></main><footer class=footer><span>&copy; 2026 <a href=https://dhmb.github.io/>dhmb</a></span> ·
+<span>Powered by
+<a href="https://gohugo.io/?utm_source=papermod" rel=noopener target=_blank>Hugo</a> &
+<a href=https://github.com/adityatelange/hugo-PaperMod/ rel=noopener target=_blank>PaperMod</a></span></footer><a href=#top id=top-link class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey=g><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+</a><script>let menu=document.getElementById("menu");if(menu){const e=localStorage.getItem("menu-scroll-position");e&&(menu.scrollLeft=parseInt(e,10)),menu.onscroll=function(){localStorage.setItem("menu-scroll-position",menu.scrollLeft)}}document.querySelectorAll('a[href^="#"]').forEach(e=>{e.addEventListener("click",function(e){e.preventDefault();var t=this.getAttribute("href").substr(1);window.matchMedia("(prefers-reduced-motion: reduce)").matches?document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView():document.querySelector(`[id='${decodeURIComponent(t)}']`).scrollIntoView({behavior:"smooth"}),t==="top"?history.replaceState(null,null," "):history.pushState(null,null,`#${t}`)})})</script><script>var toplink=document.getElementById("top-link");window.onscroll=function(){const e=window.innerHeight;document.body.scrollTop>e||document.documentElement.scrollTop>e?toplink.classList.remove("hidden"):toplink.classList.add("hidden")}</script><script>document.getElementById("theme-toggle").addEventListener("click",()=>{const e=document.querySelector("html");e.dataset.theme==="dark"?(e.dataset.theme="light",localStorage.setItem("pref-theme","light")):(e.dataset.theme="dark",localStorage.setItem("pref-theme","dark"))})</script><script>document.querySelectorAll("pre > code").forEach(e=>{const n=e.parentNode.parentNode,t=document.createElement("button");t.classList.add("copy-code"),t.innerHTML="copy";function s(){t.innerHTML="copied!",setTimeout(()=>{t.innerHTML="copy"},2e3)}t.addEventListener("click",t=>{if("clipboard"in navigator){navigator.clipboard.writeText(e.textContent),s();return}const n=document.createRange();n.selectNodeContents(e);const o=window.getSelection();o.removeAllRanges(),o.addRange(n);try{document.execCommand("copy"),s()}catch{}o.removeRange(n)}),n.classList.contains("highlight")?n.appendChild(t):n.parentNode.firstChild==n||(e.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName=="TABLE"?e.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(t):e.parentNode.appendChild(t))})</script></body></html>

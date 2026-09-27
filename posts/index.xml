@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts on dhmb</title>
+    <link>https://dhmb.github.io/posts/</link>
+    <description>Recent content in Posts on dhmb</description>
+    <image>
+      <title>dhmb</title>
+      <url>https://dhmb.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>https://dhmb.github.io/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 19 Sep 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://dhmb.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Notes on Quantum Computing</title>
+      <link>https://dhmb.github.io/posts/notes-on-quantum-computing/</link>
+      <pubDate>Sat, 19 Sep 2026 00:00:00 +0000</pubDate>
+      <guid>https://dhmb.github.io/posts/notes-on-quantum-computing/</guid>
+      <description>&lt;p&gt;This post contains some notes on quantum computing and how to simulate circuits in Python using &lt;a href=&#34;https://www.ibm.com/quantum/qiskit&#34;&gt;IBM Qiskit&lt;/a&gt;. First some general quantum mechanics is reviewed, then it is applied to both a single qubit system and multi-qubit systems with entanglement. Finally quantum teleportation is discussed.&lt;/p&gt;
+&lt;p&gt;This post will only focus on the computational aspect, the &lt;a href=&#34;https://en.wikipedia.org/wiki/Qubit#Physical_implementation&#34;&gt;physical implementation of qubits&lt;/a&gt; and &lt;a href=&#34;https://en.wikipedia.org/wiki/Quantum_error_correction&#34;&gt;quantum error correction&lt;/a&gt; will be ignored.&lt;/p&gt;
+&lt;h2 id=&#34;quantum-mechanics-and-measurement&#34;&gt;Quantum Mechanics and Measurement&lt;/h2&gt;
+&lt;p&gt;In the &lt;a href=&#34;https://en.wikipedia.org/wiki/Schr%C3%B6dinger_picture&#34;&gt;Schrödinger picture&lt;/a&gt; of quantum mechanics a quantum state is a normalized vector in a complex Hilbert space that evolves over time under the influence of constant unitary operators. This evolution is continuous in time and governed by the &lt;a href=&#34;https://en.wikipedia.org/wiki/Schr%C3%B6dinger_equation&#34;&gt;Schrödinger equation&lt;/a&gt;. The unitarity of the operators make sure the state stays normalized. Any complications arising from infinite-dimensional systems will be ignored here.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Answer Set Programming: Solving Sudoku</title>
+      <link>https://dhmb.github.io/posts/solving-sudoku-with-answer-set-programming/</link>
+      <pubDate>Sat, 06 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://dhmb.github.io/posts/solving-sudoku-with-answer-set-programming/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://en.wikipedia.org/wiki/Answer_set_programming&#34;&gt;Answer Set Programming&lt;/a&gt; is a form of declarative logic programming. You state a set of rules, defining your problem and input. The order of the rules is not relevant, they have to be satisfied as a complete set. The solver then gives you the solutions, so-called answer sets (or stable models). An answer set can be seen as a minimal set of facts that satisfy the given problem. Note that this description is very rough and imprecise. More detailed information and a lot of examples can be found in &lt;a href=&#34;https://www.cs.utexas.edu/~vl/teaching/378/ASP.pdf&#34;&gt;Answer Set Programming&lt;/a&gt; by Vladimir Lifschitz.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
